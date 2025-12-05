@@ -1,0 +1,241 @@
+<template>
+    <div class="status-back">
+        <div class="status-glass">
+            <h1>Status Board</h1>
+
+            <v-list class="status-list">
+                <template v-for="(m, index) in mess" :key="index">
+                    <v-list-item class="status-item" ripple>
+                        <template v-slot:title>
+                            <div class="job-title">{{ m.name }}</div>
+                            <div class="job-title">{{ m.age }}</div>
+                        </template>
+
+                        <template v-slot:subtitle>
+                            <div class="job-message">{{ m.message }}</div>
+                        </template>
+
+                        <template v-slot:append>
+                            <div v-if="m.accept === null || m.accept === undefined">
+                                <v-chip color="red" text-color="white" class="status-chip" @click="reject(m.id)">
+                                    Reject
+                                </v-chip>
+                                <v-chip color="green" text-color="white" class="status-chip" @click="accept(m.id)">
+                                    Accept
+                                </v-chip>
+                            </div>
+
+                            <div v-else>
+                                <v-chip :color="m.accept == 1 ? 'green' : 'red'" text-color="white" class="status-chip">
+                                    {{ m.accept == 1 ? 'Accepted' : 'Rejected' }}
+                                </v-chip>
+                            </div>
+
+                            <img src="/cross.png" alt="delete" class="delete-icon" @click="deleteRelation(m.id)" />
+                        </template>
+                    </v-list-item>
+
+                    <v-divider class="my-2"></v-divider>
+                </template>
+            </v-list>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import axios from 'axios'
+import { onMounted, ref } from 'vue'
+
+
+const mess = ref([])
+
+
+onMounted( () => {
+getMessages()
+})
+
+async function getMessages() {
+    try {
+        const token = localStorage.getItem('access_token')
+        const id = localStorage.getItem('company_id')
+        const res = await axios.get("http://127.0.0.1:8000/applications", {
+            headers: {
+                Authorization: `Token ${token}`
+            }
+        })
+        for (let i in res.data) {
+            if (res.data[i].company_id == id) {
+                mess.value.push(res.data[i])
+            }
+        }
+
+        console.log(mess)
+        return
+    }
+
+
+    catch (error) {
+        console.error(error)
+    }
+
+}
+
+function getStatusColor(status) {
+    switch (status) {
+        case true:
+            return "green"
+        case false:
+            return "red"
+    }
+}
+
+async function reject(id){
+    const token = localStorage.getItem('access_token')
+
+    try {
+    await axios.patch('http://127.0.0.1:8000/applications/' + id + "/", {
+            accept: 0,
+        },
+            {
+                headers: {
+                    Authorization: `Token ${token}`,
+                }
+            })
+        for (let i = 0; i < mess.value.length; i++) {
+            if (mess.value[i].id === id) {
+                mess.value[i].accept = 0
+                break
+            }
+        }
+        console.log("updated")
+    }
+    catch (err) {
+        console.error('Error sending message:', err)
+    }
+
+}
+
+async function accept(id){
+    const token = localStorage.getItem('access_token')
+
+    try {
+    await axios.patch('http://127.0.0.1:8000/applications/' + id + "/", {
+            accept: 1,
+        },
+            {
+                headers: {
+                    Authorization: `Token ${token}`,
+                }
+            })
+        for (let i = 0; i < mess.value.length; i++) {
+            if (mess.value[i].id === id) {
+                mess.value[i].accept = 1
+                break
+            }
+        }
+        console.log("updated")
+    }
+    catch (err) {
+        console.error('Error sending message:', err)
+    }
+
+}
+
+async function deleteRelation(id) {
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+        console.error('No access token for delete')
+        return
+    }
+    try {
+    await axios.delete('http://127.0.0.1:8000/applications/' + id + '/', {
+            headers: {
+                Authorization: `Token ${token}`,
+            }
+        })
+        mess.value = mess.value.filter((r) => r.id !== id)
+        console.log('relation deleted', id)
+    } catch (err) {
+        console.error('Error deleting relation:', err)
+    }
+}
+
+</script>
+
+<style scoped>
+.status-back {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-glass {
+    width: 70%;
+    height: 75%;
+    background: rgba(71, 104, 151, 0.132);
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 30px;
+    overflow-y: auto;
+    transition: transform 0.3s;
+
+}
+
+.status-glass:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid white;
+}
+
+.status-glass h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2em;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.status-list {
+    background: transparent !important;
+
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    transition: background 0.3s ease;
+    justify-content: space-between;
+
+}
+
+.status-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+.job-title {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 3px;
+}
+
+.job-message {
+    font-size: 0.9em;
+}
+
+.status-chip {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.delete-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    cursor: pointer;
+}
+</style>

@@ -1,0 +1,35 @@
+{
+  "name": "linkup",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
+    "@mdi/js": "^7.4.47",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
+    "auth": "^1.2.3",
+    "axios": "^1.12.2",
+    "bootstrap": "^4.6.2",
+    "pinia": "^3.0.3",
+    "bootstrap-vue": "^2.23.1",
+    "swiper": "^8.4.7",
+    "vue": "^3.5.22",
+    "vue-awesome-swiper": "^5.0.1",
+    "vue-router": "^4.5.1",
+    "vuetify": "^3.10.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.7",
+    "vite-plugin-vue-devtools": "^8.0.2"
+  }
+}
